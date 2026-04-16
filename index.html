@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ian Van Nest — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+  :root {
+    --black: #121212;
+    --white: #ffffff;
+    --accent: #ce634d;
+    --gray-bg: #f3f3f3;
+    --font-display: 'Lora', serif;
+    --font-body: 'Manrope', sans-serif;
+    --content-max: 780px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--black);
+    background: var(--white);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  img { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ───────── NAV ───────── */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid rgba(0,0,0,.1);
+  }
+
+  .nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32px 140px 0;
+    height: 84px;
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 32px;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    align-items: flex-end;
+    height: 52px;
+  }
+
+  .nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--black);
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+    padding-bottom: 0;
+    transition: color .2s;
+  }
+
+  .nav-link::after {
+    content: '';
+    display: block;
+    height: 3px;
+    border-radius: 23px 23px 0 0;
+    background: transparent;
+    transition: background .2s;
+  }
+
+  .nav-link:hover { color: var(--accent); }
+  .nav-link:hover::after,
+  .nav-link.active::after { background: var(--accent); }
+  .nav-link.active { color: var(--accent); }
+
+  .nav-hamburger {
+    display: none;
+    width: 24px;
+    height: 24px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .nav-hamburger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--black);
+    border-radius: 2px;
+    transition: transform .3s, opacity .3s;
+  }
+
+  /* Mobile menu overlay */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 84px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    z-index: 99;
+    padding: 32px 24px;
+    flex-direction: column;
+    gap: 24px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity .25s, transform .25s;
+  }
+
+  .mobile-menu.open {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .mobile-menu .nav-link {
+    font-size: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+  }
+
+  .mobile-menu .nav-link::after { display: none; }
+
+  /* ───────── HERO / INTRO ───────── */
+  .main-content {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: 80px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .avatar {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .intro-heading {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    color: #000;
+    text-align: center;
+  }
+
+  .bio {
+    font-size: 24px;
+    line-height: 1.45;
+    color: #000;
+  }
+
+  .bio .highlight {
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .bio p + p { margin-top: 13px; }
+
+  /* ───────── SECTION HEADERS ───────── */
+  .section-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 16px;
+  }
+
+  .section-header h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 32px;
+    color: #000;
+  }
+
+  /* ───────── CARDS ───────── */
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    cursor: pointer;
+    transition: transform .2s;
+  }
+
+  .card:hover { transform: translateY(-3px); }
+
+  .card-featured { padding-bottom: 24px; }
+
+  .card-image {
+    width: 100%;
+    aspect-ratio: 378 / 216;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--white);
+  }
+
+  .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    color: #000;
+    flex: 1;
+  }
+
+  .chips {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .chip {
+    background: var(--gray-bg);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--black);
+    white-space: nowrap;
+  }
+
+  .card-body {
+    font-size: 16px;
+    line-height: 26px;
+    color: #000;
+  }
+
+  /* Card grid rows */
+  .card-row {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .card-row .card { flex: 1; min-width: 0; }
+
+  /* ───────── FOOTER ───────── */
+  .footer {
+    background: var(--gray-bg);
+    border-top: 1px solid var(--gray-bg);
+    padding: 80px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .footer-contact {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer-label {
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  .footer-email {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  .footer-email a {
+    transition: color .2s;
+  }
+
+  .footer-email a:hover {
+    color: var(--accent);
+  }
+
+  /* ───────── ANIMATIONS ───────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    opacity: 0;
+    animation: fadeUp .6s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .intro { animation-delay: .1s; }
+  .bio-container { animation-delay: .25s; }
+
+  .stagger-1 { animation-delay: .15s; }
+  .stagger-2 { animation-delay: .25s; }
+  .stagger-3 { animation-delay: .35s; }
+  .stagger-4 { animation-delay: .45s; }
+  .stagger-5 { animation-delay: .55s; }
+
+  /* ───────── TABLET (≤ 834px) ───────── */
+  @media (max-width: 900px) {
+    .nav-inner {
+      padding: 32px 24px 0;
+    }
+
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+
+    .main-content {
+      max-width: var(--content-max);
+      padding: 80px 24px;
+    }
+  }
+
+  /* ───────── MOBILE (≤ 480px) ───────── */
+  @media (max-width: 480px) {
+    .main-content {
+      padding: 40px 24px;
+      gap: 24px;
+    }
+
+    .bio { font-size: 16px; line-height: 26px; }
+
+    .card-row {
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card-header-row {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chips {
+      flex-wrap: wrap;
+    }
+
+    .footer {
+      padding: 40px 24px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════ NAVIGATION ══════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">Ian Van Nest</a>
+    <div class="nav-links">
+      <a href="aio.html" class="nav-link">AI Overviews</a>
+      <a href="ppp.html" class="nav-link">Prompted Playlist for Podcasts</a>
+      <a href="s2p.html" class="nav-link">Search to Prompt</a>
+    </div>
+    <button class="nav-hamburger" aria-label="Toggle menu" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="aio.html" class="nav-link" onclick="closeMenu()">AI Overviews</a>
+  <a href="ppp.html" class="nav-link" onclick="closeMenu()">Prompted Playlist for Podcasts</a>
+  <a href="s2p.html" class="nav-link" onclick="closeMenu()">Search to Prompt</a>
+</div>
+
+<!-- ══════ MAIN CONTENT ══════ -->
+<main class="main-content">
+
+  <!-- Intro -->
+  <div class="intro animate-in">
+    <img
+      class="avatar"
+      src="images/ian.png"
+      alt="Ian Van Nest"
+    >
+    <h1 class="intro-heading">Hey there, I'm Ian</h1>
+  </div>
+
+  <!-- Bio -->
+  <div class="bio-container animate-in" style="width:100%">
+    <div class="bio">
+      <p>
+        I'm a senior product designer at Spotify with
+        <span class="highlight">10 years of experience making cool stuff</span>,
+        based in Boston Massachusetts. I'm focused on thoughtful implementation of AI in ways that
+        <span class="highlight">help people connect with music, podcasts, and audiobooks.</span>
+      </p>
+      <p>
+        In my spare time, I'm also a semi-professional board game designer and avid player of games of all sorts.
+      </p>
+    </div>
+  </div>
+
+  <!-- Recent Work -->
+  <div class="section-header animate-in stagger-1">
+    <h2>Recent Work</h2>
+  </div>
+
+  <!-- Featured Card: AI Overviews -->
+  <a href="aio.html" class="card card-featured animate-in stagger-2" id="ai-overviews">
+    <div class="card-image">
+      <img
+        src="images/thumb-aio.png"
+        alt="AI Overviews project screenshots"
+      >
+    </div>
+    <div class="card-meta">
+      <div class="card-header-row">
+        <h3 class="card-title">AI Overviews</h3>
+        <div class="chips">
+          <span class="chip">Case Study</span>
+          <span class="chip">Forthcoming Feature</span>
+        </div>
+      </div>
+      <p class="card-body">Using AI to turn search into a premier source for storytelling, exploration and discovery.</p>
+    </div>
+  </a>
+
+  <!-- Two-column row -->
+  <div class="card-row animate-in stagger-3">
+    <a href="ppp.html" class="card" id="prompted-playlists">
+      <div class="card-image">
+        <img
+          src="images/thumb-ppp.png"
+          alt="Prompted Playlists for Podcasts"
+        >
+      </div>
+      <div class="card-meta">
+        <div class="card-header-row">
+          <h3 class="card-title">Prompted Playlists for Podcast</h3>
+        </div>
+        <p class="card-body">Helping users explore content and discover via natural language</p>
+      </div>
+    </a>
+    <a href="s2p.html" class="card" id="search-to-prompt">
+      <div class="card-image">
+        <img
+          src="images/thumb-s2p.png"
+          alt="Search to Prompt"
+        >
+      </div>
+      <div class="card-meta">
+        <div class="card-header-row">
+          <h3 class="card-title">Search to Prompt</h3>
+        </div>
+        <p class="card-body">Instant session generation based on any user queries</p>
+      </div>
+    </a>
+  </div>
+
+  <!-- Odds and Ends -->
+  <div class="section-header animate-in stagger-4">
+    <h2>Odds and Ends</h2>
+  </div>
+
+  <a href="https://www.kickstarter.com/projects/gbg/champions-of-hara-0/description" target="_blank" rel="noopener" class="card animate-in stagger-5">
+    <div class="card-image">
+      <img
+        src="images/thumb-hara.png"
+        alt="Board Game Design"
+      >
+    </div>
+    <div class="card-meta">
+      <div class="card-header-row">
+        <h3 class="card-title">Board Game Design</h3>
+      </div>
+      <p class="card-body">I've also published two board games. Here's the one that helped me launch my career</p>
+    </div>
+  </a>
+
+</main>
+
+<!-- ══════ FOOTER ══════ -->
+<footer class="footer">
+  <div class="footer-contact">
+    <p class="footer-label">Get in Touch</p>
+    <p class="footer-email"><a href="mailto:ianvannest@gmail.com">ianvannest@gmail.com</a></p>
+  </div>
+</footer>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+  }
+  function closeMenu() {
+    document.getElementById('mobileMenu').classList.remove('open');
+  }
+
+  // Intersection Observer for scroll-triggered animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animationPlayState = 'running';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.animate-in').forEach(el => {
+    el.style.animationPlayState = 'paused';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>

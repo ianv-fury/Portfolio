@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search to Prompt — Ian Van Nest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+  :root {
+    --black: #121212;
+    --white: #ffffff;
+    --accent: #ce634d;
+    --gray-bg: #f3f3f3;
+    --font-display: 'Lora', serif;
+    --font-body: 'Manrope', sans-serif;
+    --content-max: 800px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--black);
+    background: var(--white);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  img { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ───────── NAV ───────── */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid rgba(0,0,0,.1);
+  }
+
+  .nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32px 140px 0;
+    height: 84px;
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 32px;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    align-items: flex-end;
+    height: 52px;
+  }
+
+  .nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--black);
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+    transition: color .2s;
+  }
+
+  .nav-link::after {
+    content: '';
+    display: block;
+    height: 3px;
+    border-radius: 23px 23px 0 0;
+    background: transparent;
+    transition: background .2s;
+  }
+
+  .nav-link:hover { color: var(--accent); }
+  .nav-link:hover::after,
+  .nav-link.active::after { background: var(--accent); }
+  .nav-link.active { color: var(--accent); }
+
+  .nav-hamburger {
+    display: none;
+    width: 24px;
+    height: 24px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .nav-hamburger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--black);
+    border-radius: 2px;
+    transition: transform .3s, opacity .3s;
+  }
+
+  /* Mobile menu overlay */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 84px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    z-index: 99;
+    padding: 32px 24px;
+    flex-direction: column;
+    gap: 24px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity .25s, transform .25s;
+  }
+
+  .mobile-menu.open {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .mobile-menu .nav-link {
+    font-size: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+  }
+
+  .mobile-menu .nav-link::after { display: none; }
+
+  /* ───────── MAIN CONTENT ───────── */
+  .main-content {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: 80px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  /* ───────── PRODUCT HEADER ───────── */
+  .hero-image {
+    width: 100%;
+    height: 395px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--black);
+  }
+
+  .hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .product-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .header-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 8px 0;
+  }
+
+  .chip-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .chip {
+    background: var(--gray-bg);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--black);
+    white-space: nowrap;
+  }
+
+  .date-label {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent);
+  }
+
+  .product-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 40px;
+    color: #000;
+    line-height: normal;
+  }
+
+  .product-body {
+    font-size: 16px;
+    line-height: 26px;
+    color: #202124;
+  }
+
+  .product-body p + p { margin-top: 13px; }
+
+  /* ───────── FULL-WIDTH IMAGES ───────── */
+  .image-s2p2 {
+    width: 100%;
+    aspect-ratio: 998 / 555;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .image-s2p3 {
+    width: 100%;
+    aspect-ratio: 1832 / 937;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .image-s2p2 img,
+  .image-s2p3 img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ───────── TEXT SECTIONS ───────── */
+  .text-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .text-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 32px;
+    color: #000;
+    line-height: normal;
+  }
+
+  .subsection-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    color: #000;
+    line-height: normal;
+  }
+
+  .body-text {
+    font-size: 16px;
+    line-height: 26px;
+    color: #202124;
+  }
+
+  .body-text p + p { margin-top: 13px; }
+
+  .body-text ul {
+    list-style: disc;
+    padding-left: 24px;
+    margin-bottom: 13px;
+  }
+
+  .body-text li {
+    margin-bottom: 9px;
+    line-height: 26px;
+  }
+
+  .body-text li:last-child { margin-bottom: 0; }
+
+  /* ───────── OUTCOMES ───────── */
+  .outcomes {
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .outcomes-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    color: #000;
+  }
+
+  .outcomes-body {
+    font-size: 16px;
+    line-height: 28px;
+    color: #202124;
+  }
+
+  .outcomes-body p { margin-bottom: 20px; }
+
+  .outcomes-body ul {
+    list-style: disc;
+    padding-left: 24px;
+  }
+
+  .outcomes-body li {
+    margin-bottom: 9px;
+    line-height: 28px;
+  }
+
+  .outcomes-body li:last-child { margin-bottom: 0; }
+
+  /* ───────── UP NEXT ───────── */
+  .up-next {
+    background: var(--gray-bg);
+    border-top: 1px solid var(--gray-bg);
+    padding: 80px;
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .up-next-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 350px;
+    cursor: pointer;
+    transition: transform .2s;
+  }
+
+  .up-next-card:hover { transform: translateY(-3px); }
+
+  .up-next-card-image {
+    width: 100%;
+    aspect-ratio: 350 / 200;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--black);
+  }
+
+  .up-next-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .up-next-card-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    color: #000;
+  }
+
+  /* ───────── ANIMATIONS ───────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    opacity: 0;
+    animation: fadeUp .6s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .stagger-1 { animation-delay: .1s; }
+  .stagger-2 { animation-delay: .2s; }
+  .stagger-3 { animation-delay: .3s; }
+  .stagger-4 { animation-delay: .4s; }
+  .stagger-5 { animation-delay: .5s; }
+
+  /* ───────── TABLET (≤ 900px) ───────── */
+  @media (max-width: 900px) {
+    .nav-inner {
+      padding: 32px 24px 0;
+    }
+
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+
+    .main-content {
+      padding: 40px 24px;
+      gap: 48px;
+    }
+
+    .hero-image {
+      height: 345px;
+    }
+
+    .up-next {
+      padding: 40px 80px;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .up-next-card {
+      width: 100%;
+      max-width: 400px;
+    }
+  }
+
+  /* ───────── MOBILE (≤ 480px) ───────── */
+  @media (max-width: 480px) {
+    .main-content {
+      padding: 24px;
+      gap: 24px;
+    }
+
+    .hero-image {
+      height: 150px;
+      border-radius: 8px;
+    }
+
+    .product-title {
+      font-size: 32px;
+    }
+
+    .info-row {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 28px;
+    }
+
+    .up-next {
+      padding: 40px 24px;
+    }
+
+    .up-next-card {
+      width: 100%;
+      max-width: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════ NAVIGATION ══════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Ian Van Nest</a>
+    <div class="nav-links">
+      <a href="aio.html" class="nav-link">AI Overviews</a>
+      <a href="ppp.html" class="nav-link">Prompted Playlist for Podcasts</a>
+      <a href="#" class="nav-link active">Search to Prompt</a>
+    </div>
+    <button class="nav-hamburger" aria-label="Toggle menu" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="aio.html" class="nav-link" onclick="closeMenu()">AI Overviews</a>
+  <a href="ppp.html" class="nav-link" onclick="closeMenu()">Prompted Playlist for Podcasts</a>
+  <a href="#" class="nav-link active" onclick="closeMenu()">Search to Prompt</a>
+</div>
+
+<!-- ══════ MAIN CONTENT ══════ -->
+<main class="main-content">
+
+  <!-- Product Header -->
+  <div class="product-header animate-in stagger-1">
+    <div class="hero-image">
+      <img src="images/S2P/S2P1.png" alt="Search to Prompt">
+    </div>
+    <div class="header-meta">
+      <div class="info-row">
+        <div class="chip-row">
+          <span class="chip">Product Overview</span>
+          <span class="chip">Live Now</span>
+        </div>
+        <span class="date-label">Product Design Lead: Jan 25 – May 25</span>
+      </div>
+      <h1 class="product-title">Search to Prompt</h1>
+      <div class="product-body">
+        <p>Search to Prompt is one of Spotify's early AI success stories. The core concept is simple: users often ask for complex mixes of genres, moods and activities that match their moment. Before this product, they'd have to scan dozens of almost-right playlists to find the closest match. Now, S2P <strong>instantly generates a playlist to match their exact vibe.</strong></p>
+        <p>It's a small-but-mighty feature that has <strong>improved search success rates across the board.</strong> Its success has also heavily influenced our AI roadmap, and helped us hone our beliefs about what the forthcoming Spotify Agent should focus on doing well.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphic 1 -->
+  <div class="image-s2p2 animate-in stagger-2">
+    <img src="images/S2P/S2P2.png" alt="Search to Prompt design explorations">
+  </div>
+
+  <!-- Testing & Iteration -->
+  <div class="text-section animate-in stagger-3">
+    <div class="text-block">
+      <h2 class="section-title">Testing &amp; Iteration</h2>
+      <div class="body-text">
+        <p>The first version of the feature heavily prioritized two things: helping the user understand that the playlist was being generated in the moment based on their search, and having Spotify's AI DJ "take credit" for the playlist. These features tested well in usability testing. Users were enthusiastic, and were able to identify that "Spotify is making the playlist for me in real time".</p>
+        <p>However... our first A/B test revealed something different. Users weren't tapping on the playlist, and consumption from the second item skyrocketed. But at the same time, the users who were making it into the playlist were having longer-than-average listening sessions. The playlist was working well, but the entry point was not. A combination of survey responses and data analysis revealed that banner blindness was the issue. Users were so used to their current search workflows that they were missing the top result entirely.</p>
+      </div>
+    </div>
+    <div class="text-block">
+      <h3 class="subsection-title">Learning from failure</h3>
+      <div class="body-text">
+        <p>I proposed two paths forward:</p>
+        <ul>
+          <li>Leaning deeper into the chat-style interface and building a "thinking" state animation to catch users attention</li>
+          <li>Stepping back from the chat interface entirely, and favoring something that looks and feels like a traditional track row</li>
+        </ul>
+        <p>Quick un-moderated testing revealed a clear winner. Though users had positive things to say about the animated state, the simple row just clicked for everyone. We honed in on making sure that the title closely resembled the user's initial query, and when we relaunched we saw click-through rates skyrocket. After releasing the feature, we quickly saw statistically significant gains in search success rate, and strong listening stats for the playlists themselves.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphic 2 -->
+  <div class="image-s2p3 animate-in stagger-4">
+    <img src="images/S2P/S2P3.png" alt="Search to Prompt iteration results">
+  </div>
+
+  <!-- Outcomes -->
+  <div class="outcomes animate-in stagger-5">
+    <h2 class="outcomes-title">Outcomes</h2>
+    <div class="outcomes-body">
+      <p>This product has become a key part of Spotify's AI strategy.</p>
+      <ul>
+        <li>Created a core belief that instant session generation is Spotify's superpower</li>
+        <li>Increased leadership's confidence about investing in features like the forthcoming "Spotify Agent"</li>
+        <li>Powerful tool inside other search products. In testing AI Overviews, we realized that creating sessions to match a user's question is one of our biggest differentiators.</li>
+        <li>Currently undergoing a branding revitalization, and will soon be available as a major function of the Spotify Agent.</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════ UP NEXT ══════ -->
+<section class="up-next">
+  <a href="aio.html" class="up-next-card">
+    <div class="up-next-card-image">
+      <img src="images/Thumb-AIO.png" alt="AI Overviews">
+    </div>
+    <p class="up-next-card-title">AI Overviews</p>
+  </a>
+  <a href="ppp.html" class="up-next-card">
+    <div class="up-next-card-image">
+      <img src="images/Thumb-PPP.png" alt="Prompted Playlists for Podcast">
+    </div>
+    <p class="up-next-card-title">Prompted Playlists for Podcast</p>
+  </a>
+</section>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+  }
+  function closeMenu() {
+    document.getElementById('mobileMenu').classList.remove('open');
+  }
+
+  // Intersection Observer for scroll-triggered animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animationPlayState = 'running';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.animate-in').forEach(el => {
+    el.style.animationPlayState = 'paused';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>

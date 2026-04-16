@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompted Podcast Playlists — Ian Van Nest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+  :root {
+    --black: #121212;
+    --white: #ffffff;
+    --accent: #ce634d;
+    --gray-bg: #f3f3f3;
+    --font-display: 'Lora', serif;
+    --font-body: 'Manrope', sans-serif;
+    --content-max: 900px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--black);
+    background: var(--white);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  img { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ───────── NAV ───────── */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid rgba(0,0,0,.1);
+  }
+
+  .nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32px 140px 0;
+    height: 84px;
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 32px;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    align-items: flex-end;
+    height: 52px;
+  }
+
+  .nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--black);
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+    padding-bottom: 0;
+    transition: color .2s;
+  }
+
+  .nav-link::after {
+    content: '';
+    display: block;
+    height: 3px;
+    border-radius: 23px 23px 0 0;
+    background: transparent;
+    transition: background .2s;
+  }
+
+  .nav-link:hover { color: var(--accent); }
+  .nav-link:hover::after,
+  .nav-link.active::after { background: var(--accent); }
+  .nav-link.active { color: var(--accent); }
+
+  .nav-hamburger {
+    display: none;
+    width: 24px;
+    height: 24px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .nav-hamburger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--black);
+    border-radius: 2px;
+    transition: transform .3s, opacity .3s;
+  }
+
+  /* Mobile menu overlay */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 84px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    z-index: 99;
+    padding: 32px 24px;
+    flex-direction: column;
+    gap: 24px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity .25s, transform .25s;
+  }
+
+  .mobile-menu.open {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .mobile-menu .nav-link {
+    font-size: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+  }
+
+  .mobile-menu .nav-link::after { display: none; }
+
+  /* ───────── MAIN CONTENT ───────── */
+  .main-content {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: 80px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* ───────── PRODUCT HEADER ───────── */
+  .hero-image {
+    width: 100%;
+    height: 500px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--black);
+  }
+
+  .hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .product-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .header-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 8px 0;
+  }
+
+  .chip-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .chip {
+    background: var(--gray-bg);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--black);
+    white-space: nowrap;
+  }
+
+  .date-label {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent);
+  }
+
+  .product-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 40px;
+    color: #000;
+    line-height: normal;
+  }
+
+  .product-body {
+    font-size: 16px;
+    line-height: 26px;
+    color: #202124;
+  }
+
+  .product-body p + p { margin-top: 13px; }
+
+  /* ───────── SECOND IMAGE ───────── */
+  .full-image {
+    width: 100%;
+    aspect-ratio: 1920 / 1080;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .full-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ───────── OUTCOMES ───────── */
+  .outcomes {
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .outcomes-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    color: #000;
+  }
+
+  .outcomes-body {
+    font-size: 16px;
+    line-height: 28px;
+    color: #202124;
+  }
+
+  .outcomes-body p + p { margin-top: 20px; }
+
+  .stat-cards {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: var(--gray-bg);
+    border-radius: 16px;
+    padding: 16px;
+    flex: 1 0 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stat-title {
+    font-weight: 700;
+    font-size: 16px;
+    color: #000;
+    line-height: normal;
+  }
+
+  .stat-body {
+    font-size: 16px;
+    line-height: normal;
+    color: #000;
+  }
+
+  .stat-body p + p { margin-top: 13px; }
+
+  .stat-quote {
+    color: var(--accent);
+  }
+
+  /* ───────── UP NEXT ───────── */
+  .up-next {
+    background: var(--gray-bg);
+    border-top: 1px solid var(--gray-bg);
+    padding: 40px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .up-next-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 32px;
+    color: #000;
+  }
+
+  .up-next-cards {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+  }
+
+  .up-next-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 378px;
+    cursor: pointer;
+    transition: transform .2s;
+  }
+
+  .up-next-card:hover { transform: translateY(-3px); }
+
+  .up-next-card-image {
+    width: 100%;
+    aspect-ratio: 378 / 216;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--white);
+  }
+
+  .up-next-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .up-next-card-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    color: #000;
+  }
+
+  /* ───────── ANIMATIONS ───────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    opacity: 0;
+    animation: fadeUp .6s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .stagger-1 { animation-delay: .1s; }
+  .stagger-2 { animation-delay: .2s; }
+  .stagger-3 { animation-delay: .3s; }
+
+  /* ───────── TABLET (≤ 900px) ───────── */
+  @media (max-width: 900px) {
+    .nav-inner {
+      padding: 32px 24px 0;
+    }
+
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+
+    .main-content {
+      padding: 24px;
+    }
+
+    .hero-image {
+      height: auto;
+      aspect-ratio: 900 / 442;
+    }
+
+    .up-next {
+      padding: 40px 80px;
+    }
+  }
+
+  /* ───────── MOBILE (≤ 480px) ───────── */
+  @media (max-width: 480px) {
+    .main-content {
+      padding: 24px;
+    }
+
+    .hero-image {
+      height: 192px;
+      aspect-ratio: unset;
+      border-radius: 8px;
+    }
+
+    .info-row {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .product-title {
+      font-size: 32px;
+    }
+
+    .stat-cards {
+      flex-direction: column;
+    }
+
+    .stat-card {
+      flex: unset;
+      width: 100%;
+    }
+
+    .up-next {
+      padding: 40px 24px;
+    }
+
+    .up-next-cards {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .up-next-card {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════ NAVIGATION ══════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Ian Van Nest</a>
+    <div class="nav-links">
+      <a href="aio.html" class="nav-link">AI Overviews</a>
+      <a href="#" class="nav-link active">Prompted Playlist for Podcasts</a>
+      <a href="s2p.html" class="nav-link">Search to Prompt</a>
+    </div>
+    <button class="nav-hamburger" aria-label="Toggle menu" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="aio.html" class="nav-link" onclick="closeMenu()">AI Overviews</a>
+  <a href="#" class="nav-link active" onclick="closeMenu()">Prompted Playlist for Podcasts</a>
+  <a href="s2p.html" class="nav-link" onclick="closeMenu()">Search to Prompt</a>
+</div>
+
+<!-- ══════ MAIN CONTENT ══════ -->
+<main class="main-content">
+
+  <!-- Product Header -->
+  <div class="product-header animate-in stagger-1">
+    <div class="hero-image">
+      <img
+        src="images/PPP/ppp1.gif"
+        alt="Prompted Podcast Playlists"
+      >
+    </div>
+    <div class="header-meta">
+      <div class="info-row">
+        <div class="chip-row">
+          <span class="chip">Product Overview</span>
+          <span class="chip">Live Now</span>
+        </div>
+        <span class="date-label">Product Design Lead: Sept 25 – Feb 26</span>
+      </div>
+      <h1 class="product-title">Prompted Podcast Playlists</h1>
+      <div class="product-body">
+        <p>In early 2025, Spotify kicked off exploration around a new feature called Prompted Playlists. I was pulled in to figure out how this feature could work for podcasts. The goal was to make podcast discovery feel effortless and personal.</p>
+        <p>This was a high visibility project, which the CTO (now CEO) Gustav Soderstrom was personally invested in, and my product manager and I presented work directly to him.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Second Image -->
+  <div class="full-image animate-in stagger-2">
+    <img
+      src="images/PPP/PPP 2.png"
+      alt="Prompted Playlists design explorations"
+    >
+  </div>
+
+  <!-- Outcomes -->
+  <div class="outcomes animate-in stagger-3">
+    <h2 class="outcomes-title">Outcomes</h2>
+    <div class="outcomes-body">
+      <p>This product launched in early 2026, and has been met with positive reviews. Among users who have found the product, podcast discovery is trending upwards, and user return rate is high.</p>
+      <p>Usage data is also beginning to reveal the ways users are shaping their playlists. Three dominant trends have emerged:</p>
+    </div>
+    <div class="stat-cards">
+      <div class="stat-card">
+        <p class="stat-title">Build me a feed (30%)</p>
+        <div class="stat-body">
+          <p>Users want a living, auto-updating playlist that acts like a personalized podcast feed:</p>
+          <p class="stat-quote">"Create a playlist that updates daily with the most recent news"</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <p class="stat-title">Curate around a topic (30%)</p>
+        <div class="stat-body">
+          <p>Users want to find content about a specific topic, usually to choose one episode to listen to</p>
+          <p class="stat-quote">"Build me a podcast playlist all about science and innovation"</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <p class="stat-title">Manage my backlog (10%)</p>
+        <div class="stat-body">
+          <p>Users want help organizing what they already have:</p>
+          <p class="stat-quote">"Catch up on shows I'm behind on"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════ UP NEXT ══════ -->
+<section class="up-next">
+  <h2 class="up-next-title">Up Next</h2>
+  <div class="up-next-cards">
+    <a href="aio.html" class="up-next-card">
+      <div class="up-next-card-image">
+        <img
+          src="https://www.figma.com/api/mcp/asset/fcf0b215-803c-4a5c-a8a3-e68773c13f6e"
+          alt="AI Overviews"
+        >
+      </div>
+      <p class="up-next-card-title">AI Overviews</p>
+    </a>
+    <a href="s2p.html" class="up-next-card">
+      <div class="up-next-card-image">
+        <img
+          src="https://www.figma.com/api/mcp/asset/8e3606d3-27cd-4d8b-892c-96ce631773cb"
+          alt="Search to Prompt"
+        >
+      </div>
+      <p class="up-next-card-title">Search to Prompt</p>
+    </a>
+  </div>
+</section>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+  }
+  function closeMenu() {
+    document.getElementById('mobileMenu').classList.remove('open');
+  }
+
+  // Intersection Observer for scroll-triggered animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animationPlayState = 'running';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.animate-in').forEach(el => {
+    el.style.animationPlayState = 'paused';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
